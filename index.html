@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendario de Adviento</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: black;
+      font-family: Arial;
+    }
+
+    /* CONTENEDOR - AHORA CON EL GIF DE ENTRADA COMO FONDO */
+    #contenedor-gif {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      /* SOLUCIÓN AL PARPADEO: El GIF siempre visible detrás */
+      background-image: url("assets/gif.gif"); 
+      background-size: contain; 
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    /* Este ID ahora se usará solo para los elementos de video, ya no para el GIF */
+    #gif-principal {
+      width: 105%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    /* ESTILO DEL CUADRO DE TEXTO (ACTÚA COMO BOTÓN) */
+    #texto {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 85vw;
+      padding: 12px;
+      background: white;
+      border: 3px solid red;
+      border-radius: 12px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.4);
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      z-index: 10;
+      cursor: pointer; 
+      transition: transform 0.1s;
+    }
+    
+    #texto:active {
+        transform: translateX(-50%) scale(0.98);
+    }
+  </style>
+</head>
+<body>
+
+  <audio id="voz-personaje" src="assets/copitosi.mp3"></audio>
+
+  <div id="texto"></div>
+
+  <div id="contenedor-gif">
+    <img id="gif-principal" src="">
+  </div>
+
+  <script>
+
+    const gifEntrada = "assets/gif.gif";       // Se usa como fondo CSS
+    const videoPrimerClick = "assets/gif2.mp4"; 
+    const videoRepetido = "assets/gif3.mp4";   
+
+    const mensajeInicial = "Da clic aquí para descubrir tu sorpresa de hoy";
+    const mensajeRepetido = "Es uno por día suato, vuelve mañana.";
+
+    const mensajesPorDia = [
+        "",
+        "Feliz navidad!!", //1
+        "Abre el regalo número 3", //2
+        "Abre el regalo número 20", //3
+        "Abre el regalo número 17", //4
+        "Abre el regalo número 6", //5
+        "Abre el regalo número 23", //6
+        "Abre el regalo número 1", //7
+        "Abre el regalo número 9", //8
+        "Abre el regalo número 12", //9
+        "Abre el regalo número 25", //10
+        "Abre el regalo número 8", //11
+        "Abre el regalo número 19", //12
+        "Abre el regalo número 11", //13
+        "Abre el regalo número 2", //14
+        "Abre el regalo número 15", //15
+        "Abre el regalo número 7", //16
+        "Abre el regalo número 22", //17
+        "Abre el regalo número 16", //18
+        "Abre el regalo número 18", //19
+        "Abre el regalo número 4", //20
+        "Abre el regalo número 10", //21
+        "Abre el regalo número 5", //22
+        "Abre el regalo número 13", //23
+        "Abre el regalo número 24", //24
+        "Feliz aniversariooo, abre el regalo número 21", //25
+        "Ya no hay regalos, invitame unos bongles!!",
+        "¿Qué haces aquí?",
+        "Eres el mejor!!",
+        "¿Que haces aquí?",
+        "Comprame pollo",
+        "Feliz año nuevoooo!!"
+    ];
+
+    /* ---------- TEXTO LENTO + AUDIO ---------- */
+    function escribirTextoLento(texto, velocidad = 40) {
+      const cuadro = document.getElementById("texto");
+      cuadro.textContent = "";
+
+      const voz = document.getElementById("voz-personaje");
+      // Detiene y reinicia el audio para que siempre comience al inicio del mensaje
+      voz.pause();
+      voz.currentTime = 0; 
+      voz.play().catch(() => {});
+
+      let i = 0;
+      const intervalo = setInterval(() => {
+        cuadro.textContent += texto[i];
+        i++;
+
+        // Cuando termina de escribir, detiene el audio
+        if (i >= texto.length) {
+            clearInterval(intervalo);
+            voz.pause(); 
+        }
+      }, velocidad);
+    }
+
+    /* ---------- ESTADO INICIAL ---------- */
+    const contenedorGif = document.getElementById("contenedor-gif");
+    // El GIF ya se muestra con CSS. Solo se inicializa el texto.
+    escribirTextoLento(mensajeInicial);
+
+    const hoy = new Date().toDateString();
+
+    /* ---------- CAMBIAR A VIDEO ---------- */
+    function reproducirVideo(rutaVideo) {
+      // Limpia el contenido actual (el tag <img> inicial si existe o el video anterior)
+      contenedorGif.innerHTML = ''; 
+
+      const video = document.createElement("video");
+      video.src = rutaVideo;
+      video.autoplay = true;
+      video.muted = true;
+      video.playsinline = true;
+      video.loop = false;
+      // Usamos el mismo ID para aplicar los estilos de tamaño
+      video.id = "gif-principal"; 
+      
+      // Aplicar estilos directamente o mantener el estilo CSS si se desea:
+      video.style.width = "105%";
+      video.style.height = "100%";
+      video.style.objectFit = "contain";
+      video.style.objectPosition = "center";
+
+      contenedorGif.appendChild(video);
+    }
+
+    /* ---------- EVENTO CLIC EN EL CUADRO DE TEXTO ---------- */
+    document.getElementById("texto").addEventListener("click", () => {
+
+      const ultimoDia = localStorage.getItem("clickHoy");
+
+      // Si NO ha clickeado hoy
+      if (ultimoDia !== hoy) {
+        localStorage.setItem("clickHoy", hoy);
+
+        reproducirVideo(videoPrimerClick);
+
+        const dia = new Date().getDate();
+        // Usa el mensaje del día actual (índice 1 para el día 1)
+        escribirTextoLento(mensajesPorDia[dia]); 
+        return;
+      }
+
+      // Si YA clickeó hoy
+      reproducirVideo(videoRepetido);
+      escribirTextoLento(mensajeRepetido);
+    });
+
+  </script>
+
+</body>
+</html>
