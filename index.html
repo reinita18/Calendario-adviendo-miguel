@@ -83,9 +83,9 @@
 
   <script>
 
-    const gifEntrada = "assets/gif.gif";       // Se usa como fondo CSS
+    const gifEntrada = "assets/gif.gif";       // Se usa como fondo CSS
     const videoPrimerClick = "assets/gif2.mp4"; 
-    const videoRepetido = "assets/gif3.mp4";   
+    const videoRepetido = "assets/gif3.mp4";   
 
     const mensajeInicial = "Da clic aquí para descubrir tu sorpresa de hoy";
     const mensajeRepetido = "Es uno por día suato, vuelve mañana.";
@@ -93,30 +93,30 @@
     const mensajesPorDia = [
         "",
         "Feliz navidad!!", //1
-        "Abre el regalo número 3", //2
+        "Abre el regalo número 3", //2 paletas payaso
         "Abre el regalo número 20", //3
         "Abre el regalo número 17", //4
-        "Abre el regalo número 6", //5
-        "Abre el regalo número 23", //6
-        "Abre el regalo número 1", //7
-        "Abre el regalo número 9", //8
+        "Abre el regalo número 6", //5 perfume
+        "Abre el regalo número 23", //6 cancion gravedad
+        "Abre el regalo número 1", //7 teni 1
+        "Abre el regalo número 9", //8 teni 2
         "Abre el regalo número 12", //9
         "Abre el regalo número 25", //10
         "Abre el regalo número 8", //11
         "Abre el regalo número 19", //12
-        "Abre el regalo número 11", //13
+        "Abre el regalo número 11", //13 libro 31 minutos 
         "Abre el regalo número 2", //14
         "Abre el regalo número 15", //15
         "Abre el regalo número 7", //16
         "Abre el regalo número 22", //17
         "Abre el regalo número 16", //18
-        "Abre el regalo número 18", //19
+        "Abre el regalo número 18", //19 playera waltmart
         "Abre el regalo número 4", //20
         "Abre el regalo número 10", //21
         "Abre el regalo número 5", //22
         "Abre el regalo número 13", //23
         "Abre el regalo número 24", //24
-        "Feliz aniversariooo, abre el regalo número 21", //25
+        "Feliz aniversariooo, abre el regalo número 21", //25 Dibujo
         "Ya no hay regalos, invitame unos bongles!!",
         "¿Qué haces aquí?",
         "Eres el mejor!!",
@@ -125,40 +125,46 @@
         "Feliz año nuevoooo!!"
     ];
 
-    /* ---------- TEXTO LENTO + AUDIO ---------- */
+    /* ---------- AUDIO 3 VECES + TEXTO LENTO ---------- */
     function escribirTextoLento(texto, velocidad = 40) {
       const cuadro = document.getElementById("texto");
       cuadro.textContent = "";
 
       const voz = document.getElementById("voz-personaje");
-      // Detiene y reinicia el audio para que siempre comience al inicio del mensaje
-      voz.pause();
-      voz.currentTime = 0; 
-      voz.play().catch(() => {});
 
+      // 🔊 Reproducir 3 veces seguidas
+      let repeticiones = 0;
+      voz.currentTime = 0;
+      voz.play().catch(()=>{});
+
+      voz.onended = function () {
+        repeticiones++;
+        if (repeticiones < 3) {
+          voz.currentTime = 0;
+          voz.play();
+        }
+      };
+
+      // ⌨️ Animación de escritura
       let i = 0;
       const intervalo = setInterval(() => {
         cuadro.textContent += texto[i];
         i++;
 
-        // Cuando termina de escribir, detiene el audio
         if (i >= texto.length) {
-            clearInterval(intervalo);
-            voz.pause(); 
+          clearInterval(intervalo);
         }
       }, velocidad);
     }
 
     /* ---------- ESTADO INICIAL ---------- */
     const contenedorGif = document.getElementById("contenedor-gif");
-    // El GIF ya se muestra con CSS. Solo se inicializa el texto.
     escribirTextoLento(mensajeInicial);
 
     const hoy = new Date().toDateString();
 
     /* ---------- CAMBIAR A VIDEO ---------- */
     function reproducirVideo(rutaVideo) {
-      // Limpia el contenido actual (el tag <img> inicial si existe o el video anterior)
       contenedorGif.innerHTML = ''; 
 
       const video = document.createElement("video");
@@ -167,10 +173,7 @@
       video.muted = true;
       video.playsinline = true;
       video.loop = false;
-      // Usamos el mismo ID para aplicar los estilos de tamaño
       video.id = "gif-principal"; 
-      
-      // Aplicar estilos directamente o mantener el estilo CSS si se desea:
       video.style.width = "105%";
       video.style.height = "100%";
       video.style.objectFit = "contain";
@@ -191,7 +194,6 @@
         reproducirVideo(videoPrimerClick);
 
         const dia = new Date().getDate();
-        // Usa el mensaje del día actual (índice 1 para el día 1)
         escribirTextoLento(mensajesPorDia[dia]); 
         return;
       }
